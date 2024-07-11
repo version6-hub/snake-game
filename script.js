@@ -1,6 +1,11 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 const scoreElement = document.getElementById('score');
+const startPopup = document.getElementById('start-popup');
+const gameOverPopup = document.getElementById('game-over-popup');
+const startButton = document.getElementById('start-button');
+const restartButton = document.getElementById('restart-button');
+const finalScoreElement = document.getElementById('final-score');
 
 const gridSize = 20;
 const tileCount = canvas.width / gridSize;
@@ -12,6 +17,7 @@ let food = {x: 15, y: 15};
 let dx = 0;
 let dy = 0;
 let score = 0;
+let gameInterval;
 
 function drawGame() {
     clearCanvas();
@@ -59,12 +65,12 @@ function generateFood() {
 function checkCollision() {
     const head = snake[0];
     if (head.x < 0 || head.x >= tileCount || head.y < 0 || head.y >= tileCount) {
-        resetGame();
+        gameOver();
     }
     
     for (let i = 1; i < snake.length; i++) {
         if (head.x === snake[i].x && head.y === snake[i].y) {
-            resetGame();
+            gameOver();
         }
     }
 }
@@ -75,13 +81,12 @@ function resetGame() {
     dx = 0;
     dy = 0;
     score = 0;
+    updateScore();
 }
 
 function updateScore() {
     scoreElement.textContent = `Score: ${score}`;
 }
-
-document.addEventListener('keydown', changeDirection);
 
 function changeDirection(event) {
     const LEFT_KEY = 37;
@@ -117,4 +122,23 @@ function changeDirection(event) {
     }
 }
 
-setInterval(drawGame, 100);
+function startGame() {
+    resetGame();
+    startPopup.style.display = 'none';
+    gameOverPopup.style.display = 'none';
+    gameInterval = setInterval(drawGame, 100);
+    document.addEventListener('keydown', changeDirection);
+}
+
+function gameOver() {
+    clearInterval(gameInterval);
+    document.removeEventListener('keydown', changeDirection);
+    finalScoreElement.textContent = `Final Score: ${score}`;
+    gameOverPopup.style.display = 'block';
+}
+
+startButton.addEventListener('click', startGame);
+restartButton.addEventListener('click', startGame);
+
+// Show start popup when the page loads
+startPopup.style.display = 'block';
